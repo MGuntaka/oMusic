@@ -1,12 +1,12 @@
 package opendyne.vj.omusic;
 
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+
 import android.content.res.Configuration;
+
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -16,12 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
@@ -29,9 +28,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private ListView listView;
     private String [] titles;
     private ActionBarDrawerToggle drawerToggle;
-    private OmusicAdapter omusicAdapter;
-    private  View mFragmentContainerView;
-
+    private OmusicAdapter oMusicAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,10 +36,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         titles = getResources().getStringArray(R.array.titles);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         listView = (ListView) findViewById(R.id.oMusicListView);
-        omusicAdapter = new OmusicAdapter(this);
-        listView.setAdapter(omusicAdapter);
+        oMusicAdapter = new OmusicAdapter(this);
+        listView.setAdapter(oMusicAdapter);
         listView.setOnItemClickListener(this);
-
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.drawable.ic_drawer,
                 R.string.drawer_opened,
@@ -61,6 +57,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         drawerLayout.setDrawerListener(drawerToggle);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if (savedInstanceState == null) {
+            selectItem(0);
+        }
     }
 
     @Override
@@ -105,33 +105,40 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         selectItem(position);
     }
-
+// This changes the fragments when the user clicks on navigation drawer items.
     private void selectItem(int position) {
 
-        android.app.FragmentManager manager = getFragmentManager();
-
-        OMusicTracksFragment fragment = new OMusicTracksFragment();
-
-        //TODO: change the fragment when the user clicks on navigationDrawer items.
+        android.app.Fragment fragment = null;
         switch (position) {
+            case 0:
+                fragment = new PlayerFragment();
+                break;
             case 1:
                 fragment = new OMusicTracksFragment();
                 break;
+            case 2:
+                fragment = new OMusicAlubumFragment();
+                break;
+            case 3:
+                fragment = new OMusicPlaylistFragment();
+                break;
+            case 4:
+                fragment = new OMusicArtistFragment();
+                break;
             default:
                 break;
+
         }
-
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.container, fragment, "TRACK");
-
-        transaction.commit();
-        if (drawerLayout != null) {
-            drawerLayout.closeDrawer(mFragmentContainerView);
+        if(fragment != null) {
+            FragmentManager manager = getFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.replace(R.id.container, fragment);
+            transaction.commit();
+            listView.setItemChecked(position, true);
+            listView.setSelection(position);
+            setTitle(titles[position]);
+            drawerLayout.closeDrawer(listView);
         }
-
-
-        listView.setItemChecked(position, true);
-        setTitle(titles[position]);
     }
 
     public void setTitle(String title) {
@@ -139,7 +146,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
 }
-
 //Adapter for assigning text and images for navigation drawer.
 
 class OmusicAdapter extends BaseAdapter {

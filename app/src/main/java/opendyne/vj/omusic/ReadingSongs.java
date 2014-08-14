@@ -9,14 +9,16 @@ import java.util.HashMap;
 
 /**
  * Created by mguntaka on 6/8/14.
+ * This class takes care of reading all mp3 songs from SD card and returns an ArrayList with
+ * songTitle, songPath, songDuration.
+ * TODO: at present it reading songs from only SD card, We have to extend this class by providing
+ * TODO: access to reading songs from SD-CARD as well as InternalMemory.
  */
 public class ReadingSongs {
     final String MEDIA_PATH = Environment.getExternalStorageDirectory()
             .getPath() + "/";
     private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
     private String mp3Pattern = ".mp3";
-    private FileInputStream fileInputStream;
-
     public ReadingSongs() {
 
     }
@@ -63,7 +65,7 @@ public class ReadingSongs {
             songMap.put("songTitle",
                     song.getName().substring(0, (song.getName().length() - 4)));
             songMap.put("songPath", song.getPath());
-
+            songMap.put("songDuration", String.valueOf(song.length()));
             // Adding each song to SongList
             songsList.add(songMap);
         }
